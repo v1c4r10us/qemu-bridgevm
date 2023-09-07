@@ -9,28 +9,29 @@
 [*] Adding bridge network to ethernet interface (with nmcli)                                        
 ```
 # Instructions
-1. Verify 'name' of your ethernet-card (Ex. enp1s0):
+1. Verify 'name' of your interface card (Ex. enp1s0):
 ```bash
-nmcli device
+$ nmcli device
 ```
 2. Create the bridge (Ex. br0):
 ```bash
-nmcli con add type bridge con-name br0 ifname br0 stp yes
+$ nmcli con add type bridge autoconnect yes con-name br0 ifname br0
 ```
-3. Add your ethernet-card to the bridge:
+3. Modify the connection (Assign static IP if necesary)
 ```bash
-nmcli con add type ethernet slave-type bridge con-name newcon ifname enp1s0 master br0  
+$ nmcli con edit br0
+nmcli> set ipv4.method manual
+nmcli> set ipv4.address 172.15.5.254/24
+nmcli> set ipv4.gateway 172.15.5.1
+nmcli> set ipv4.dns 8.8.8.8
+nmcli> save
+nmcli> quit
 ```
-4. Finally activate the bridge:
+4. Configure your bridge to your physical interface
 ```bash
-nmcli con up br0
+nmcli con add type bridge autoconnect yes con-name enp1s0 ifname enp1s0 master br0
 ```
-5. The connections look like:
+5. Delete the actual physical connection from UUID:
 ```bash
-$ nmcli con show
+nmcli con del <UUID>
 
-NAME                UUID                                  TYPE      DEVICE
-br0                 4cc38959-a7ab-4e4b-a962-3a71b24f9b5c  bridge    br0
-lo                  64d39acf-76fb-4ee8-a111-7efe0e13e538  loopback  lo
-newcon              f0f44514-11bd-464e-9a94-9fdd35e260b6  ethernet  enp1s0
-```
