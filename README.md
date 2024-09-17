@@ -9,15 +9,27 @@
 [*] Adding bridge network to ethernet interface (with nmcli)                                        
 ```
 # Instructions
-1. Verify 'name' of your interface card (Ex. enp1s0):
+1. Verify 'name' of your interface card (Ex. eno1):
 ```bash
 $ nmcli device
 ```
-2. Create the bridge (Ex. br0):
+2. Delete actual ethernet connection:
+```bash
+$ nmcli con del eno1
+```
+
+3. Create the bridge (Ex. br0):
 ```bash
 $ nmcli con add type bridge autoconnect yes con-name br0 ifname br0
 ```
-3. Modify the connection (Assign static IP if necesary)
+
+4. Add ethernet slave connection:
+```bash
+$ nmcli con add type ethernet slave-type bridge con-name eno1 ifname eno1 master br0 
+```
+
+
+4. Modify the connection (Assign static IP if necesary)
 ```bash
 $ nmcli con edit br0
 nmcli> set ipv4.method manual
@@ -27,11 +39,4 @@ nmcli> set ipv4.dns 8.8.8.8
 nmcli> save
 nmcli> quit
 ```
-4. Configure your bridge to your physical interface
-```bash
-nmcli con add type bridge autoconnect yes con-name enp1s0 ifname enp1s0 master br0
-```
-5. Delete the actual physical connection from UUID:
-```bash
-nmcli con del <UUID>
-
+5. Reboot the system
